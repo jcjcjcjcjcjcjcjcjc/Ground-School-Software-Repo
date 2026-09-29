@@ -2,13 +2,24 @@
 import cv2
 import matplotlib.pyplot as plt
 
-img = cv2.imread("photo.jpg")
-if img is None:
-    raise FileNotFoundError("Could not find photo.jpg")
+video = cv2.VideoCapture("Minecraft_stitch_test.mp4")
+frames, i = [], 0
 
-edges = cv2.Canny(img, 100, 200)
+while True:
+    ok, frame = video.read()
+    if not ok:
+        break
+    if i%5 == 0:
+        frames.append(cv2.resize(frame, None, fx=0.9, fy=0.9))
+    i += 1
 
-plt.imshow(edges, cmap="gray")
-plt.axis("off")
-plt.savefig("edges.png")
-plt.show()
+video.release()
+
+stitcher = cv2.Stitcher_create(cv2.Stitcher_SCANS)
+status, mosaic = stitcher.stitch(frames)
+if status == cv2.Stitcher_OK:
+    cv2.imwrite("stiched_image.jpg", mosaic)
+    plt.imshow(mosaic)
+    plt.show()
+else:
+    print(status)
